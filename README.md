@@ -1,2 +1,6 @@
-# exynos_ufs_driver_woa
-Exynos UFS driver for Windows 10/11 (ARM64)
+# Exynos UFS driver for Windows 10/11 (ARM64)
+this is exclusive to Samsung Exynos-based Android Devices
+
+## Devices Supported
+For now, it will be the Motorola One Action (troika) but soon i will add some devices like Motorola One Vision (kane)
+
