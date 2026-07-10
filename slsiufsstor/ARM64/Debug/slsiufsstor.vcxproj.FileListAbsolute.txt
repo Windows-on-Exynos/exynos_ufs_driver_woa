@@ -1,1 +1,0 @@
-D:\a50-troika\exynos_ufs_driver_woa\slsiufsstor\ARM64\Debug\slsiufsstor.sys
