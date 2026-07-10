@@ -26,7 +26,6 @@ DriverEntry(
     // Allocate the driver configuration object
     WDF_DRIVER_CONFIG config;
 
-    // Print "Hello World" for DriverEntry
     KdPrintEx((DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "SlsiUfsStor: DriverEntry\n"));
 
     // Initialize the driver configuration object to register the
@@ -233,7 +232,6 @@ KmdfSlsiUfsStorEvtDeviceAdd(
     // Allocate the device object
     WDFDEVICE hDevice;
 
-    // Print "Hello World"
     KdPrintEx((DPFLTR_IHVDRIVER_ID, DPFLTR_INFO_LEVEL, "SlsiUfsStor: KmdfSlsiUfsStorEvtDeviceAdd\n"));
 
     WDF_OBJECT_ATTRIBUTES deviceAttributes;
