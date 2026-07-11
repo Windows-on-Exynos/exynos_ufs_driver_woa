@@ -60,5 +60,8 @@ SlsiUfsInitializeController(
         "SlsiUfsStor: VER = 0x%08X\n",
         Context->UfsVersion));
 
+    Context->ControllerInitialized = TRUE;
+    Context->State = UfsStateReady;
+
     return STATUS_SUCCESS;
 }
