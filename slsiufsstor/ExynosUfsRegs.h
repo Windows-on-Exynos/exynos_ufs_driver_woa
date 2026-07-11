@@ -11,7 +11,7 @@
 #define UFSHCI_REG_VER 0x08
 
 //
-// I took this from kernel-slsi for Motorola One Action
+// I took this from kernel-slsi (downstream kernel) for Motorola One Action
 //
 #define HCI_TXPRDT_ENTRY_SIZE		0x00
 #define HCI_RXPRDT_ENTRY_SIZE		0x04
