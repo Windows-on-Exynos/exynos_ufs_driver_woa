@@ -36,7 +36,10 @@ SlsiUfsInitializeController(
     _In_ PSLSI_UFS_DEVICE_CONTEXT Context
 )
 {
-    UNREFERENCED_PARAMETER(Context);
+    if (Context == NULL || Context->Registers == NULL)
+    {
+        return STATUS_INVALID_DEVICE_STATE;
+    }
 
     Context->Capabilities =
         SlsiUfsReadRegister(
@@ -60,8 +63,16 @@ SlsiUfsInitializeController(
         "SlsiUfsStor: VER = 0x%08X\n",
         Context->UfsVersion));
 
-    Context->ControllerInitialized = TRUE;
-    Context->State = UfsStateReady;
+    if (Context->UfsVersion == 0xFFFFFFFF)
+    {
+        KdPrintEx((DPFLTR_IHVDRIVER_ID,
+            DPFLTR_ERROR_LEVEL,
+            "SlsiUfsStor: Invalid UFS version register\n"));
+
+        return STATUS_DEVICE_HARDWARE_ERROR;
+    }
+
+    Context->State = UfsStateInitializing;
 
     return STATUS_SUCCESS;
 }
