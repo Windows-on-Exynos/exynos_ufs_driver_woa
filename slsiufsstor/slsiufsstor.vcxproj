@@ -226,11 +226,13 @@
     <FilesToPackage Include="$(TargetPath)" />
   </ItemGroup>
   <ItemGroup>
+    <ClCompile Include="Device.c" />
     <ClCompile Include="Driver.c" />
     <ClCompile Include="UfsHw.c" />
     <ClCompile Include="UfsState.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="Device.h" />
     <ClInclude Include="Driver.h" />
     <ClInclude Include="ExynosUfsRegs.h" />
     <ClInclude Include="UfsHw.h" />
