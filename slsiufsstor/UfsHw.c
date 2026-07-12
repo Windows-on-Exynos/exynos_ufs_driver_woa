@@ -31,6 +31,17 @@ SlsiUfsWriteRegister(
     );
 }
 
+ULONG
+SlsiUfsGetControllerStatus(
+    PSLSI_UFS_DEVICE_CONTEXT Context
+)
+{
+    return SlsiUfsReadRegister(
+        Context,
+        UFSHCI_REG_CONTROLLER_STATUS
+    );
+}
+
 NTSTATUS
 SlsiUfsInitializeController(
     _In_ PSLSI_UFS_DEVICE_CONTEXT Context
