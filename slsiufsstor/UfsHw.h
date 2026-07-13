@@ -9,6 +9,11 @@
 
 #include "Driver.h"
 
+NTSTATUS
+SlsiUfsVerifyResources(
+    _In_ PSLSI_UFS_DEVICE_CONTEXT Context
+);
+
 ULONG
 SlsiUfsReadRegister(
     _In_ PSLSI_UFS_DEVICE_CONTEXT Context,

@@ -169,6 +169,48 @@ SlsiUfsStorEvtPrepareHardware(
         DPFLTR_INFO_LEVEL,
         "SlsiUfsStor: MMIO mapped\n"));
 
+    status = SlsiUfsVerifyResources(context);
+
+    if (!NT_SUCCESS(status))
+    {
+        return status;
+    }
+
+    if (context->RegistersBase.QuadPart == 0)
+    {
+        return STATUS_DEVICE_CONFIGURATION_ERROR;
+    }
+
+    if (context->RegistersLength < 0x1000)
+    {
+        return STATUS_DEVICE_CONFIGURATION_ERROR;
+    }
+
+    if (context->Registers == NULL)
+    {
+        return STATUS_INSUFFICIENT_RESOURCES;
+    }
+
+    if (context->RegistersBase.QuadPart != 0x13520000ULL)
+    {
+        KdPrintEx((DPFLTR_IHVDRIVER_ID,
+            DPFLTR_ERROR_LEVEL,
+            "SlsiUfsStor: Unexpected MMIO base 0x%llX\n",
+            context->RegistersBase.QuadPart));
+
+        return STATUS_DEVICE_CONFIGURATION_ERROR;
+    }
+
+    if (context->RegistersLength != 0x1100)
+    {
+        KdPrintEx((DPFLTR_IHVDRIVER_ID,
+            DPFLTR_ERROR_LEVEL,
+            "SlsiUfsStor: Unexpected MMIO length 0x%lX\n",
+            context->RegistersLength));
+
+        return STATUS_DEVICE_CONFIGURATION_ERROR;
+    }
+
     context->State = UfsStateInitializing;
 
     status = SlsiUfsInitializeController(context);

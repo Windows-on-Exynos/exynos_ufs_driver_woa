@@ -71,6 +71,39 @@ SlsiUfsReadControllerState(
 }
 
 NTSTATUS
+SlsiUfsVerifyResources(
+    _In_ PSLSI_UFS_DEVICE_CONTEXT Context
+)
+{
+    if (Context == NULL)
+    {
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    KdPrintEx((DPFLTR_IHVDRIVER_ID,
+        DPFLTR_INFO_LEVEL,
+        "SlsiUfsStor: MMIO Base  = 0x%llX\n",
+        Context->RegistersBase.QuadPart));
+
+    KdPrintEx((DPFLTR_IHVDRIVER_ID,
+        DPFLTR_INFO_LEVEL,
+        "SlsiUfsStor: MMIO Length = 0x%lX\n",
+        Context->RegistersLength));
+
+    KdPrintEx((DPFLTR_IHVDRIVER_ID,
+        DPFLTR_INFO_LEVEL,
+        "SlsiUfsStor: Interrupt Vector = %lu\n",
+        Context->InterruptVector));
+
+    KdPrintEx((DPFLTR_IHVDRIVER_ID,
+        DPFLTR_INFO_LEVEL,
+        "SlsiUfsStor: Interrupt Level = %lu\n",
+        Context->InterruptLevel));
+
+    return STATUS_SUCCESS;
+}
+
+NTSTATUS
 SlsiUfsResetController(
     _In_ PSLSI_UFS_DEVICE_CONTEXT Context
 )
