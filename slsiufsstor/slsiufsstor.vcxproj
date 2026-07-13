@@ -230,7 +230,10 @@
     <ClCompile Include="Driver.c" />
     <ClCompile Include="ExynosUfsHw.c" />
     <ClCompile Include="UfsHw.c" />
+    <ClCompile Include="UfsScsi.c" />
     <ClCompile Include="UfsState.c" />
+    <ClCompile Include="UfsUic.c" />
+    <ClCompile Include="UfsUpiu.c" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="Device.h" />
@@ -239,7 +242,10 @@
     <ClInclude Include="ExynosUfsRegs.h" />
     <ClInclude Include="UfsHw.h" />
     <ClInclude Include="UfsRegs.h" />
+    <ClInclude Include="UfsScsi.h" />
     <ClInclude Include="UfsState.h" />
+    <ClInclude Include="UfsUic.h" />
+    <ClInclude Include="UfsUpiu.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

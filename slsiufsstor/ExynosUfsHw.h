@@ -1,3 +1,7 @@
+//
+// Copyright (c) 2026 viZPilot
+//
+
 #pragma once
 
 #include <ntddk.h>
