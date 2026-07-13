@@ -55,6 +55,11 @@ typedef struct _SLSI_UFS_DEVICE_CONTEXT
 
     ULONG UfsVersion;
     ULONG Capabilities;
+
+    ULONG ControllerStatus;
+    ULONG ControllerEnable;
+    ULONG InterruptStatus;
+    ULONG InterruptEnable;
 } SLSI_UFS_DEVICE_CONTEXT, * PSLSI_UFS_DEVICE_CONTEXT;
 
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(

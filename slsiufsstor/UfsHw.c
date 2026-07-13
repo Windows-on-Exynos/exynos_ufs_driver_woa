@@ -43,10 +43,63 @@ SlsiUfsGetControllerStatus(
 }
 
 NTSTATUS
+SlsiUfsReadControllerState(
+    PSLSI_UFS_DEVICE_CONTEXT Context
+)
+{
+    Context->ControllerStatus =
+        SlsiUfsReadRegister(
+            Context,
+            UFSHCI_REG_CONTROLLER_STATUS);
+
+    Context->ControllerEnable =
+        SlsiUfsReadRegister(
+            Context,
+            UFSHCI_REG_CONTROLLER_ENABLE);
+
+    Context->InterruptStatus =
+        SlsiUfsReadRegister(
+            Context,
+            UFSHCI_REG_INTERRUPT_STATUS);
+
+    Context->InterruptEnable =
+        SlsiUfsReadRegister(
+            Context,
+            UFSHCI_REG_INTERRUPT_ENABLE);
+
+    return STATUS_SUCCESS;
+}
+
+NTSTATUS
+SlsiUfsResetController(
+    _In_ PSLSI_UFS_DEVICE_CONTEXT Context
+)
+{
+    ULONG value;
+
+    value = SlsiUfsReadRegister(
+        Context,
+        UFSHCI_REG_CONTROLLER_ENABLE);
+
+    //
+    // Modify register according to required secuency.
+    //
+
+    SlsiUfsWriteRegister(
+        Context,
+        UFSHCI_REG_CONTROLLER_ENABLE,
+        value);
+
+    return STATUS_SUCCESS;
+}
+
+NTSTATUS
 SlsiUfsInitializeController(
     _In_ PSLSI_UFS_DEVICE_CONTEXT Context
 )
 {
+    NTSTATUS Status;
+
     if (Context == NULL || Context->Registers == NULL)
     {
         return STATUS_INVALID_DEVICE_STATE;
@@ -81,6 +134,13 @@ SlsiUfsInitializeController(
             "SlsiUfsStor: Invalid UFS version register\n"));
 
         return STATUS_DEVICE_HARDWARE_ERROR;
+    }
+
+    Status = SlsiUfsReadControllerState(Context);
+
+    if (!NT_SUCCESS(Status))
+    {
+        return Status;
     }
 
     Context->State = UfsStateInitializing;
