@@ -75,12 +75,6 @@ SlsiUfsResetController(
     _In_ PSLSI_UFS_DEVICE_CONTEXT Context
 )
 {
-    ULONG value;
-
-    value = SlsiUfsReadRegister(
-        Context,
-        UFSHCI_REG_CONTROLLER_ENABLE);
-
     //
     // Modify register according to required secuency.
     //
@@ -88,7 +82,7 @@ SlsiUfsResetController(
     SlsiUfsWriteRegister(
         Context,
         UFSHCI_REG_CONTROLLER_ENABLE,
-        value);
+        1);
 
     return STATUS_SUCCESS;
 }

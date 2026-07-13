@@ -189,9 +189,12 @@
 
 #define VS_GPIO_OUT			0x070
 
+#define VS_IS				0x038
 #define VS_SW_RST			0x050
 #define VS_FORCE_HCS		0x0B4
 
 #define UIC_CMD_DME_ENABLE	0x12
 #define UIC_CMD_DME_RESET	0x14
+
+
 
