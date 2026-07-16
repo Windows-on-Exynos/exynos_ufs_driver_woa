@@ -4,6 +4,10 @@
 
 #pragma once
 
+/* Interrupt status */
+#define UFS_BIT(x)	(1L << (x))
+#define UIC_COMMAND_COMPL    UFS_BIT(10)
+
 //
 // UFSHCI Registers (I took them from Little Kernel (LK) for Exynos 9610)
 //

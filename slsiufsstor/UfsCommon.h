@@ -9,6 +9,8 @@
 #include "ExynosUfsHw.h"
 #include "ExynosUfsRegs.h"
 
+#define UFS_UIC_TIMEOUT_ITERATIONS 1000000
+
 //
 // I took them from Android (downstream) kernel-slsi from Motorola
 //

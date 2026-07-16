@@ -14,6 +14,11 @@ typedef struct _SLSI_UIC_COMMAND
 } SLSI_UIC_COMMAND, * PSLSI_UIC_COMMAND;
 
 NTSTATUS
+SlsiUfsWaitUicCompletion(
+    _In_ PSLSI_UFS_DEVICE_CONTEXT Context
+);
+
+NTSTATUS
 SlsiUfsSendUicCommand(
     _In_ PSLSI_UFS_DEVICE_CONTEXT Context,
     _In_ PSLSI_UIC_COMMAND Command
