@@ -3,9 +3,7 @@
 //
 
 #include <ntddk.h>
-#include "UfsHw.h"
-#include "UfsRegs.h"
-#include "ExynosUfsRegs.h"
+#include "UfsCommon.h"
 
 ULONG
 SlsiUfsReadRegister(

@@ -5,7 +5,7 @@
 #include <ntddk.h>
 #include <wdf.h>
 
-#include "UfsState.h"
+#include "UfsCommon.h"
 #include "Driver.h"
 
 NTSTATUS

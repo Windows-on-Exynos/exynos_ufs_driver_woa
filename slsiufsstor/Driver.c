@@ -5,9 +5,7 @@
 #include <ntddk.h>
 #include <wdf.h>
 
-#include "UfsHw.h"
-#include "UfsState.h"
-#include "Driver.h"
+#include "UfsCommon.h"
 
 DRIVER_INITIALIZE DriverEntry;
 EVT_WDF_DRIVER_DEVICE_ADD KmdfSlsiUfsStorEvtDeviceAdd;

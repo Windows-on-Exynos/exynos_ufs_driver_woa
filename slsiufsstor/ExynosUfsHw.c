@@ -2,8 +2,7 @@
 // Copyright (c) 2026 viZPilot
 //
 
-#include "ExynosUfsHw.h"
-#include "ExynosUfsRegs.h"
+#include "UfsCommon.h"
 
 ULONG
 SlsiExynosReadRegister(

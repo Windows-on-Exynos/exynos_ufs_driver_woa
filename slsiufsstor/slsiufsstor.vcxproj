@@ -240,6 +240,7 @@
     <ClInclude Include="Driver.h" />
     <ClInclude Include="ExynosUfsHw.h" />
     <ClInclude Include="ExynosUfsRegs.h" />
+    <ClInclude Include="UfsCommon.h" />
     <ClInclude Include="UfsHw.h" />
     <ClInclude Include="UfsRegs.h" />
     <ClInclude Include="UfsScsi.h" />

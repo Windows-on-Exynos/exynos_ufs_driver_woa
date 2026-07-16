@@ -8,25 +8,6 @@
 
 #include "UfsState.h"
 
-//
-// I took this from kernel-slsi (downstream kernel) for Motorola One Action (troika)
-//
-
-/*
- * Unipro attribute value
- */
-#define TXTRAILINGCLOCKS	0x10
-#define TACTIVATE_10_USEC	400	/* unit: 10us */
-
- /* Device ID */
-#define DEV_ID	0x00
-#define PEER_DEV_ID	0x01
-#define PEER_CPORT_ID	0x00
-#define TRAFFIC_CLASS	0x00
-
-#define IATOVAL_NSEC		20000	/* unit: ns */
-
-
 typedef struct _SLSI_UFS_DEVICE_CONTEXT
 {
     //
