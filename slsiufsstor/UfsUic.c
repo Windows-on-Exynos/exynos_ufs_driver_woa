@@ -8,6 +8,116 @@
 // I ported these functions from Little Kernel for Exynos 9610
 //
 NTSTATUS
+SlsiUfsDmeSet(
+    _In_ PSLSI_UFS_DEVICE_CONTEXT Context,
+    _In_ ULONG Attribute,
+    _In_ ULONG Value
+)
+{
+    SLSI_UIC_COMMAND command;
+
+    RtlZeroMemory(&command, sizeof(command));
+
+    command.CmdOpcode = UIC_CMD_DME_SET;
+    command.CmdArgument1 = Attribute;
+    command.CmdArgument2 = 0;
+    command.CmdArgument3 = Value;
+
+    return SlsiUfsSendUicCommand(
+        Context);
+}
+
+NTSTATUS
+SlsiUfsDmeGet(
+    _In_ PSLSI_UFS_DEVICE_CONTEXT Context,
+    _In_ ULONG Attribute,
+    _Out_ PULONG Value
+)
+{
+    NTSTATUS status;
+    SLSI_UIC_COMMAND command;
+
+    if (Value == NULL)
+    {
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    RtlZeroMemory(&command, sizeof(command));
+
+    command.CmdOpcode = UIC_CMD_DME_GET;
+    command.CmdArgument1 = Attribute;
+    command.CmdArgument2 = 0;
+    command.CmdArgument3 = 0;
+
+    status = SlsiUfsSendUicCommand(
+        Context);
+
+    if (!NT_SUCCESS(status))
+    {
+        return status;
+    }
+
+    *Value = command.CmdArgument3;
+
+    return STATUS_SUCCESS;
+}
+
+NTSTATUS
+SlsiUfsDmePeerSet(
+    _In_ PSLSI_UFS_DEVICE_CONTEXT Context,
+    _In_ ULONG Attribute,
+    _In_ ULONG Value
+)
+{
+    SLSI_UIC_COMMAND command;
+
+    RtlZeroMemory(&command, sizeof(command));
+
+    command.CmdOpcode = UIC_CMD_DME_PEER_SET;
+    command.CmdArgument1 = Attribute;
+    command.CmdArgument2 = 0;
+    command.CmdArgument3 = Value;
+
+    return SlsiUfsSendUicCommand(
+        Context);
+}
+
+NTSTATUS
+SlsiUfsDmePeerGet(
+    _In_ PSLSI_UFS_DEVICE_CONTEXT Context,
+    _In_ ULONG Attribute,
+    _Out_ PULONG Value
+)
+{
+    NTSTATUS status;
+    SLSI_UIC_COMMAND command;
+
+    if (Value == NULL)
+    {
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    RtlZeroMemory(&command, sizeof(command));
+
+    command.CmdOpcode = UIC_CMD_DME_PEER_GET;
+    command.CmdArgument1 = Attribute;
+    command.CmdArgument2 = 0;
+    command.CmdArgument3 = 0;
+
+    status = SlsiUfsSendUicCommand(
+        Context);
+
+    if (!NT_SUCCESS(status))
+    {
+        return status;
+    }
+
+    *Value = command.CmdArgument3;
+
+    return STATUS_SUCCESS;
+}
+
+NTSTATUS
 SlsiUfsWaitUicCompletion(
     _In_ PSLSI_UFS_DEVICE_CONTEXT Context
 )
@@ -61,12 +171,13 @@ SlsiUfsWaitUicCompletion(
 
 NTSTATUS
 SlsiUfsSendUicCommand(
-    _In_ PSLSI_UFS_DEVICE_CONTEXT Context,
-    _In_ PSLSI_UIC_COMMAND Command
+    _In_ PSLSI_UFS_DEVICE_CONTEXT Context
 ) 
 {
     NTSTATUS status;
     ULONG uicStatus;
+
+    PSLSI_UIC_COMMAND Command;
 
     if (Context == NULL ||
         Context->Registers == NULL ||
