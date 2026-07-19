@@ -34,5 +34,6 @@ SlsiUfsWaitUicCompletion(
 
 NTSTATUS
 SlsiUfsSendUicCommand(
-    _In_ PSLSI_UFS_DEVICE_CONTEXT Context
+    _In_ PSLSI_UFS_DEVICE_CONTEXT Context,
+    _Inout_ PSLSI_UIC_COMMAND Command
 );

@@ -24,7 +24,7 @@ SlsiUfsDmeSet(
     command.CmdArgument3 = Value;
 
     return SlsiUfsSendUicCommand(
-        Context);
+        Context, &command);
 }
 
 NTSTATUS
@@ -50,7 +50,7 @@ SlsiUfsDmeGet(
     command.CmdArgument3 = 0;
 
     status = SlsiUfsSendUicCommand(
-        Context);
+        Context, &command);
 
     if (!NT_SUCCESS(status))
     {
@@ -79,7 +79,7 @@ SlsiUfsDmePeerSet(
     command.CmdArgument3 = Value;
 
     return SlsiUfsSendUicCommand(
-        Context);
+        Context, &command);
 }
 
 NTSTATUS
@@ -105,7 +105,7 @@ SlsiUfsDmePeerGet(
     command.CmdArgument3 = 0;
 
     status = SlsiUfsSendUicCommand(
-        Context);
+        Context, &command);
 
     if (!NT_SUCCESS(status))
     {
@@ -137,7 +137,7 @@ SlsiUfsWaitUicCompletion(
         interruptStatus =
             SlsiUfsReadRegister(
                 Context,
-                UFSHCI_REG_INTERRUPT_ENABLE);
+                UFSHCI_REG_INTERRUPT_STATUS);
 
         if (interruptStatus & UIC_COMMAND_COMPL)
         {
@@ -171,20 +171,12 @@ SlsiUfsWaitUicCompletion(
 
 NTSTATUS
 SlsiUfsSendUicCommand(
-    _In_ PSLSI_UFS_DEVICE_CONTEXT Context
+    _In_ PSLSI_UFS_DEVICE_CONTEXT Context,
+    _Inout_ PSLSI_UIC_COMMAND Command
 ) 
 {
     NTSTATUS status;
     ULONG uicStatus;
-
-    PSLSI_UIC_COMMAND Command;
-
-    if (Context == NULL ||
-        Context->Registers == NULL ||
-        Command == NULL)
-    {
-        return STATUS_INVALID_PARAMETER;
-    }
 
     SlsiUfsWriteRegister(Context,
         REG_UIC_COMMAND_ARG_1,
@@ -249,6 +241,72 @@ SlsiUfsSendUicCommand(
             "UIC: DME_GET returned ARG3 = 0x%08X\n",
             Command->CmdArgument3));
     }
+
+    return STATUS_SUCCESS;
+}
+
+NTSTATUS
+SlsiUfsLinkStartup(
+    _In_ PSLSI_UFS_DEVICE_CONTEXT Context
+)
+{
+    NTSTATUS status;
+    SLSI_UIC_COMMAND command;
+
+    if (Context == NULL)
+    {
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    Context->State = UfsStateLinkStartup;
+
+    //
+    // DME_RESET
+    //
+    RtlZeroMemory(&command, sizeof(command));
+
+    command.CmdOpcode = UIC_CMD_DME_RESET;
+
+    status = SlsiUfsSendUicCommand(Context, &command);
+
+    if (!NT_SUCCESS(status))
+    {
+        Context->State = UfsStateError;
+        return status;
+    }
+
+    //
+    // DME_ENABLE
+    //
+    RtlZeroMemory(&command, sizeof(command));
+
+    command.CmdOpcode = UIC_CMD_DME_ENABLE;
+
+    status = SlsiUfsSendUicCommand(Context, &command);
+
+    if (!NT_SUCCESS(status))
+    {
+        Context->State = UfsStateError;
+        return status;
+    }
+
+    //
+    // LINK_STARTUP
+    //
+    RtlZeroMemory(&command, sizeof(command));
+
+    command.CmdOpcode = UIC_CMD_DME_LINK_STARTUP;
+
+    status = SlsiUfsSendUicCommand(Context, &command);
+
+    if (!NT_SUCCESS(status))
+    {
+        Context->State = UfsStateError;
+        return status;
+    }
+
+    Context->ControllerInitialized = TRUE;
+    Context->State = UfsStateDeviceInit;
 
     return STATUS_SUCCESS;
 }
