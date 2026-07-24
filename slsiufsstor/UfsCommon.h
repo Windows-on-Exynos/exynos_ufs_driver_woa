@@ -2,10 +2,10 @@
 
 #include "UfsHw.h"
 #include "UfsRegs.h"
-#include "UfsScsi.h"
 #include "UfsState.h"
 #include "UfsUic.h"
 #include "UfsUpiu.h"
+#include "UfsScsi.h"
 #include "ExynosUfsHw.h"
 #include "ExynosUfsRegs.h"
 

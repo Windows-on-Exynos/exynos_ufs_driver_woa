@@ -73,6 +73,9 @@ typedef struct _UFS_PRDT
 
 } UFS_PRDT;
 
+//
+// UTP Transfer Request Descriptor (UTRD)
+//
 typedef struct _UFS_UTRD
 {
     //
@@ -124,5 +127,49 @@ typedef struct _UFS_COMMAND_DESCRIPTOR
     UFS_PRDT PrdtTable[128];
 
 } UFS_COMMAND_DESCRIPTOR, * PUFS_COMMAND_DESCRIPTOR;
+
+typedef struct _UFS_COMMAND_UPIU
+{
+    UFS_UPIU_HEADER Header;
+
+    //
+    // DW3-DW7
+    //
+    UCHAR ExpectedDataTransferLength[4];
+
+    UCHAR Reserved1[4];
+
+    UCHAR Cdb[16];
+
+} UFS_COMMAND_UPIU, * PUFS_COMMAND_UPIU;
+
+#define UPIU_TRANSACTION_COMMAND       0x01
+
+#define UFS_MAX_TRANSFER_REQUESTS      32
+#define UFS_MAX_TASK_REQUESTS          8
+
+#define UFS_RESPONSE_UPIU_OFFSET \
+    FIELD_OFFSET(UFS_COMMAND_DESCRIPTOR, ResponseUpiu)
+
+#define UFS_PRDT_OFFSET \
+    FIELD_OFFSET(UFS_COMMAND_DESCRIPTOR, PrdtTable)
+
+NTSTATUS
+SlsiUfsInitializeTransferRequest(
+    _In_ PSLSI_UFS_DEVICE_CONTEXT Context,
+    _Out_ PUFS_UTRD Utrd,
+    _In_ PHYSICAL_ADDRESS CommandDescriptorPhysical,
+    _In_ USHORT PrdtEntries
+);
+
+NTSTATUS
+SlsiUfsBuildCommandUpiu(
+    _Out_ PUFS_COMMAND_UPIU Upiu,
+    _In_reads_bytes_(CdbLength) PUCHAR Cdb,
+    _In_ UCHAR CdbLength,
+    _In_ ULONG TransferLength,
+    _In_ UCHAR Lun,
+    _In_ UCHAR TaskTag
+);
 
 #pragma pack(pop)
