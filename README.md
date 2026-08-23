@@ -2,7 +2,7 @@
 this UFS driver is exclusive to Samsung Exynos-based Android Devices
 
 ## Devices Supported
-For now, it will be the Motorola One Action (troika) but soon i will test it on some devices like Motorola One Vision (kane)
+For now, it will be the Motorola One Action (troika) but soon i will test it on some devices like Motorola One Vision (kane) and Samsung Galaxy A50
 
 ## Current Status
 WORK IN PROGRESS
