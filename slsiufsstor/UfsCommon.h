@@ -11,6 +11,11 @@
 
 #define UFS_UIC_TIMEOUT_ITERATIONS 1000000
 
+#define UFS_TRANSFER_SLOT_0 0
+
+#define UFS_TRANSFER_SLOT_BIT(Slot) \
+    (1UL << (Slot))
+
 //
 // I took them from Android (downstream) kernel-slsi from Motorola
 //

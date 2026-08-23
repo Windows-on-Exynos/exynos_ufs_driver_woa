@@ -71,7 +71,7 @@ typedef struct _UFS_PRDT
     ULONG Reserved;
     ULONG Size;
 
-} UFS_PRDT;
+} UFS_PRDT, * PUFS_PRDT;
 
 //
 // UTP Transfer Request Descriptor (UTRD)

@@ -4,6 +4,8 @@
 
 #pragma once
 
+#define UFS_INQUIRY_DATA_LENGTH 36
+
 NTSTATUS
 SlsiUfsBuildTestUnitReady(
     _Out_ PUFS_COMMAND_UPIU Upiu,

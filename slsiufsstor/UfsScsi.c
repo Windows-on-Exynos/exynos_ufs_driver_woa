@@ -139,3 +139,107 @@ SlsiUfsTestInquiry(
             ));
     }
 }
+
+NTSTATUS
+SlsiUfsPrepareInquiryBuffer(
+    _In_ PSLSI_UFS_DEVICE_CONTEXT Context
+)
+{
+    if (Context == NULL)
+    {
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    Context->InquiryBuffer = NULL;
+    Context->InquiryBufferLength = 0;
+    Context->InquiryBufferPhysical.QuadPart = 0;
+
+    //
+    // La reserva DMA real la conectaremos aquí.
+    //
+    // Por ahora esta función solamente establece
+    // el tamaño requerido.
+    //
+    Context->InquiryBufferLength =
+        UFS_INQUIRY_DATA_LENGTH;
+
+    return STATUS_SUCCESS;
+}
+
+NTSTATUS
+SlsiUfsInitializeInquiryPrdt(
+    _In_ PSLSI_UFS_DEVICE_CONTEXT Context
+)
+{
+    PUFS_PRDT prdt;
+
+    if (Context == NULL)
+    {
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    if (Context->CommandDescriptor == NULL)
+    {
+        return STATUS_INVALID_DEVICE_STATE;
+    }
+
+    if (Context->InquiryBuffer == NULL)
+    {
+        return STATUS_INVALID_DEVICE_STATE;
+    }
+
+    prdt =
+        &Context->CommandDescriptor->PrdtTable[0];
+
+    RtlZeroMemory(
+        prdt,
+        sizeof(UFS_PRDT)
+    );
+
+    prdt->BaseAddressLow =
+        Context->InquiryBufferPhysical.LowPart;
+
+    prdt->BaseAddressHigh =
+        Context->InquiryBufferPhysical.HighPart;
+
+    prdt->Reserved = 0;
+
+    prdt->Size =
+        UFS_INQUIRY_DATA_LENGTH;
+
+    return STATUS_SUCCESS;
+}
+
+NTSTATUS
+SlsiUfsSubmitTransferRequest(
+    _In_ PSLSI_UFS_DEVICE_CONTEXT Context,
+    _In_ ULONG Slot
+)
+{
+    ULONG doorbell;
+
+    if (Context == NULL)
+    {
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    if (Context->UtrdList == NULL)
+    {
+        return STATUS_INVALID_DEVICE_STATE;
+    }
+
+    if (Slot >= UFS_MAX_TRANSFER_REQUESTS)
+    {
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    doorbell = 1UL << Slot;
+
+    SlsiUfsWriteRegister(
+        Context,
+        REG_UTP_TRANSFER_REQ_DOOR_BELL,
+        doorbell
+    );
+
+    return STATUS_SUCCESS;
+}

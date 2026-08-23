@@ -79,7 +79,15 @@ SlsiUfsInitializeTransferRequest(
     //
     // No PRDT entries yet.
     //
-    utrd->PrdtLength = 0;
+    utrd->PrdtLength = 1;
+
+    utrd->PrdtOffset =
+        (USHORT)(
+            FIELD_OFFSET(
+                UFS_COMMAND_DESCRIPTOR,
+                PrdtTable
+            ) / sizeof(ULONG)
+            );
 
     //
     // Use the actual UPIU size expected by our descriptor.
@@ -88,6 +96,36 @@ SlsiUfsInitializeTransferRequest(
         (USHORT)(
             sizeof(UFS_UPIU) / sizeof(ULONG)
             );
+
+    return STATUS_SUCCESS;
+}
+
+NTSTATUS
+SlsiUfsConfigureTransferRequestList(
+    _In_ PSLSI_UFS_DEVICE_CONTEXT Context
+)
+{
+    if (Context == NULL)
+    {
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    if (Context->UtrdList == NULL)
+    {
+        return STATUS_INVALID_DEVICE_STATE;
+    }
+
+    SlsiUfsWriteRegister(
+        Context,
+        REG_UTP_TRANSFER_REQ_LIST_BASE_L,
+        Context->UtrdListPhysical.LowPart
+    );
+
+    SlsiUfsWriteRegister(
+        Context,
+        REG_UTP_TRANSFER_REQ_LIST_BASE_H,
+        Context->UtrdListPhysical.HighPart
+    );
 
     return STATUS_SUCCESS;
 }

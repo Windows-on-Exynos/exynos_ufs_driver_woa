@@ -59,6 +59,13 @@ typedef struct _SLSI_UFS_DEVICE_CONTEXT
     PUFS_COMMAND_DESCRIPTOR CommandDescriptor;
     PHYSICAL_ADDRESS CommandDescriptorPhysical;
     SIZE_T CommandDescriptorLength;
+
+    //
+    // INQUIRY data buffer
+    //
+    PUCHAR InquiryBuffer;
+    PHYSICAL_ADDRESS InquiryBufferPhysical;
+    SIZE_T InquiryBufferLength;
 } SLSI_UFS_DEVICE_CONTEXT, * PSLSI_UFS_DEVICE_CONTEXT;
 
 WDF_DECLARE_CONTEXT_TYPE_WITH_NAME(
