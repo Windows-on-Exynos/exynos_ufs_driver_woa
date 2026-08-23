@@ -157,9 +157,7 @@ typedef struct _UFS_COMMAND_UPIU
 NTSTATUS
 SlsiUfsInitializeTransferRequest(
     _In_ PSLSI_UFS_DEVICE_CONTEXT Context,
-    _Out_ PUFS_UTRD Utrd,
-    _In_ PHYSICAL_ADDRESS CommandDescriptorPhysical,
-    _In_ USHORT PrdtEntries
+    _In_ ULONG Slot
 );
 
 NTSTATUS

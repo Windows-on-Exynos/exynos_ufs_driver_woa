@@ -17,62 +17,77 @@ SlsiUfsInitializeUpiuHeader(
 NTSTATUS
 SlsiUfsInitializeTransferRequest(
     _In_ PSLSI_UFS_DEVICE_CONTEXT Context,
-    _Out_ PUFS_UTRD Utrd,
-    _In_ PHYSICAL_ADDRESS CommandDescriptorPhysical,
-    _In_ USHORT PrdtEntries
+    _In_ ULONG Slot
 )
 {
-    if (Context == NULL ||
-        Utrd == NULL)
+    PUFS_UTRD utrd;
+
+    if (Context == NULL)
     {
         return STATUS_INVALID_PARAMETER;
     }
 
-    //
-    // Clear the Transfer Request Descriptor.
-    //
+    if (Context->UtrdList == NULL ||
+        Context->CommandDescriptor == NULL)
+    {
+        return STATUS_INVALID_DEVICE_STATE;
+    }
+
+    if (Slot >= UFS_MAX_TRANSFER_REQUESTS)
+    {
+        return STATUS_INVALID_PARAMETER;
+    }
+
+    utrd = &Context->UtrdList[Slot];
+
     RtlZeroMemory(
-        Utrd,
-        sizeof(UFS_UTRD));
+        utrd,
+        sizeof(UFS_UTRD)
+    );
 
     //
-    // DW0-DW3
-    // Reserved for now.
+    // Command Descriptor physical address
     //
-    Utrd->Dw0 = 0;
-    Utrd->Dw1 = 0;
-    Utrd->Dw2 = 0;
-    Utrd->Dw3 = 0;
+    utrd->CommandDescriptorBaseAddressLow =
+        Context->CommandDescriptorPhysical.LowPart;
+
+    utrd->CommandDescriptorBaseAddressHigh =
+        Context->CommandDescriptorPhysical.HighPart;
 
     //
-    // Physical address of the Command Descriptor.
+    // Response UPIU offset.
     //
-    Utrd->CommandDescriptorBaseAddressLow =
-        CommandDescriptorPhysical.LowPart;
-
-    Utrd->CommandDescriptorBaseAddressHigh =
-        CommandDescriptorPhysical.HighPart;
-
-    //
-    // Response UPIU.
-    //
-    Utrd->ResponseUpiuOffset =
-        (USHORT)FIELD_OFFSET(
-            UFS_COMMAND_DESCRIPTOR,
-            ResponseUpiu);
-
-    Utrd->ResponseUpiuLength =
-        sizeof(UFS_UPIU);
+    utrd->ResponseUpiuOffset =
+        (USHORT)(
+            FIELD_OFFSET(
+                UFS_COMMAND_DESCRIPTOR,
+                ResponseUpiu
+            ) / sizeof(ULONG)
+            );
 
     //
-    // PRDT.
+    // PRDT offset.
     //
-    Utrd->PrdtOffset =
-        (USHORT)FIELD_OFFSET(
-            UFS_COMMAND_DESCRIPTOR,
-            PrdtTable);
+    utrd->PrdtOffset =
+        (USHORT)(
+            FIELD_OFFSET(
+                UFS_COMMAND_DESCRIPTOR,
+                PrdtTable
+            ) / sizeof(ULONG)
+            );
 
-    Utrd->PrdtLength = PrdtEntries;
+    //
+    // No PRDT entries yet.
+    //
+    utrd->PrdtLength = 0;
+
+    //
+    // Use the actual UPIU size expected by our descriptor.
+    //
+    utrd->ResponseUpiuLength =
+        (USHORT)(
+            sizeof(UFS_UPIU) / sizeof(ULONG)
+            );
 
     return STATUS_SUCCESS;
 }
