@@ -1,3 +1,10 @@
+/out/
 slsiufsstor/ARM/
 slsiufsstor/ARM64/
 slsiufsstor/.vs/
+*.aml
+*.cat
+*.cer
+*.pfx
+*.pdb
+*.obj

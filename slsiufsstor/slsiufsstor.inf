@@ -1,56 +1,63 @@
-;
-; Copyright (c) viZPilot
-;
-
 [Version]
 Signature="$WINDOWS NT$"
 Class=SCSIAdapter
 ClassGuid={4D36E97B-E325-11CE-BFC1-08002BE10318}
-Provider=%ManufacturerName%
+Provider=%ProviderName%
 CatalogFile=slsiufsstor.cat
-DriverVer=07/09/2026,1.0.0.0
+DriverVer=08/25/2026,1.0.0.0
 PnpLockdown=1
 
-[DestinationDirs]
-DefaultDestDir = 12
-
-[SourceDisksNames]
-1 = %DiskName%,,,""
-
-[SourceDisksFiles]
-slsiufsstor.sys  = 1
-
-;*****************************************
-; Install Section
-;*****************************************
-
 [Manufacturer]
-%ManufacturerName%=Standard,NT$ARCH$
+%ProviderName%=Exynos,NTarm64.10.0...19041
 
-[Standard.NT$ARCH$]
-%slsiufsstor.DeviceDesc%=slsiufsstor_Device, ACPI\SLSI20A2
+[Exynos.NTarm64.10.0...19041]
+%DeviceDesc%=ExynosUfsInstall,ACPI\SLSI20A2
 
-[slsiufsstor_Device.NT]
-CopyFiles=Drivers_Dir
+[ExynosUfsInstall]
+Include=storufs.inf
+Needs=UfsInstall
+CopyFiles=ExynosUfsCopy
 
-[Drivers_Dir]
+[ExynosUfsInstall.HW]
+Include=storufs.inf
+Needs=UfsInstall.HW
+AddReg=ExynosUfsHwAddReg
+
+[ExynosUfsHwAddReg]
+HKR,,LowerFilters,0x00010000,"slsiufsstor"
+; Conservative first-boot settings. Exynos9610 supports higher gears after validation.
+HKR,,HighSpeedGearMode,0x00010001,1
+HKR,,NumLanes,0x00010001,1
+HKR,,HSSeries,0x00010001,2
+HKR,,CommandTimeoutInMS,0x00010001,5000
+
+[ExynosUfsInstall.Services]
+Include=storufs.inf
+Needs=UfsInstall.Services
+AddService=slsiufsstor,0x00000000,ExynosUfsPlatformService
+
+[ExynosUfsPlatformService]
+DisplayName=%ServiceDesc%
+ServiceType=1
+StartType=0
+ErrorControl=1
+ServiceBinary=%12%\slsiufsstor.sys
+LoadOrderGroup=System Bus Extender
+
+[ExynosUfsCopy]
 slsiufsstor.sys
 
-;-------------- Service installation
-[slsiufsstor_Device.NT.Services]
-AddService = slsiufsstor,%SPSVCINST_ASSOCSERVICE%, slsiufsstor_Service_Inst
+[DestinationDirs]
+ExynosUfsCopy=12
 
-; -------------- slsiufsstor driver install sections
-[slsiufsstor_Service_Inst]
-DisplayName    = %slsiufsstor.SVCDESC%
-ServiceType    = 1               ; SERVICE_KERNEL_DRIVER
-StartType      = 0               ; SERVICE_DEMAND_START
-ErrorControl   = 1               ; SERVICE_ERROR_NORMAL
-ServiceBinary  = %12%\slsiufsstor.sys
+[SourceDisksNames]
+1=%DiskName%
+
+[SourceDisksFiles]
+slsiufsstor.sys=1
 
 [Strings]
-SPSVCINST_ASSOCSERVICE= 0x00000002
-ManufacturerName="Windows on Exynos Authors"
-DiskName = "Exynos UFS Storage Driver Installation Disk"
-slsiufsstor.DeviceDesc = "Exynos UFS Storage Driver Device"
-slsiufsstor.SVCDESC = "Exynos UFS Storage Driver Service"
+ProviderName="Windows on Exynos Authors"
+DeviceDesc="Samsung Exynos 9610 Universal Flash Storage Controller"
+ServiceDesc="Samsung Exynos 9610 UFS platform filter"
+DiskName="Exynos 9610 UFS Driver Installation Disk"
