@@ -59,6 +59,36 @@ stages.
 
 Open `slsiufsstor/slsiufsstor.sln`, choose `Release|ARM64`, and build.
 
+For a complete command-line build and package on Windows, run PowerShell as a
+normal developer shell from the repository root:
+
+```powershell
+Set-ExecutionPolicy -Scope Process Bypass
+.\build-windows.ps1
+```
+
+The script discovers Visual Studio and the installed WDK, prefers WDK
+`10.0.19041.0`, builds `Release|ARM64`, runs Inf2Cat when available, compiles
+the additive SSDT when `iasl.exe` is available, writes SHA-256 checksums, and
+creates a ZIP below `out/windows/Release`.
+
+Useful options:
+
+```powershell
+# Select an installed newer WDK while retaining Windows 10 2004 API targeting.
+.\build-windows.ps1 -KitVersion 10.0.26100.0
+
+# Provide ACPICA IASL explicitly.
+.\build-windows.ps1 -IaslPath C:\Tools\iasl.exe
+
+# Sign the SYS and catalog with a certificate already in the Windows store.
+.\build-windows.ps1 -CertificateThumbprint YOUR_CERTIFICATE_THUMBPRINT
+```
+
+Required components are Visual Studio 2019 or newer with C++ build tools, the
+Windows Driver Kit with ARM64 libraries, and PowerShell 5.1 or newer. IASL is
+optional; without it the script stages the ASL source but does not emit AML.
+
 ### Linux cross-build
 
 Use Clang plus the official `Microsoft.Windows.WDK.ARM64` NuGet package:
