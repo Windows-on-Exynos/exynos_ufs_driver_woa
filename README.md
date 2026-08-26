@@ -29,25 +29,33 @@ The INF uses the `NTarm64.10.0...19041` decoration and the source builds with
 
 ## Firmware contract
 
-The existing DSDT device is expected to contain:
+The corrected DSDT device is expected to contain:
 
 - `_HID = "SLSI20A2"`
 - `_CCA = 1`
-- UFSHCI memory at `0x13520000`, length at least `0x200`
+- combined UFSHCI/vendor/PMA memory at `0x13520000`, length `0x5000`
+- UniPro memory at `0x13510000`, length `0x8000`
 - ACPI interrupt GSIV `0xBD` (189), Level/ActiveHigh/Exclusive
 
 The Linux Device Tree value is SPI 157. ACPI uses the GIC interrupt ID, so the
 correct conversion is `157 + 32 = 189`. Do not change the DSDT interrupt to 157.
 
-`slsiufsstor/acpi/UFS0-CLS.asl` is an additive SSDT that adds only:
+`slsiufsstor/acpi/DSDT-troika.asl` is the replacement table for a corrected
+firmware build. The DSDT embedded in the inspected `Mu-troika.img` exposes only
+`0x1100` bytes at `0x13520000`; that does not describe the Exynos vendor and PMA
+registers used by this driver. The driver now rejects that unsafe resource
+layout rather than mapping undeclared MMIO.
+
+`slsiufsstor/acpi/UFS0-CLS.asl` remains as an additive compatibility SSDT that
+adds only:
 
 ```asl
 Name (_CLS, Package () { 0x01, 0x09, 0x01 })
 ```
 
-It must be loaded alongside the existing DSDT. It does not redefine
-`\_SB.UFS0`, so it avoids the duplicate-device namespace failure caused by a
-second complete UFS SSDT.
+It can be loaded alongside the old DSDT without redefining `\_SB.UFS0`, but it
+does not fix `_CRS` and is therefore insufficient for the current driver. See
+`docs/TROIKA-ACPI.md` for the firmware findings and integration contract.
 
 The firmware must leave the FSYS/UFS source clocks enabled. The existing
 maestro9610 LK port also relies on the clocks configured by earlier Samsung boot
@@ -69,7 +77,7 @@ Set-ExecutionPolicy -Scope Process Bypass
 
 The script discovers Visual Studio and the installed WDK, prefers WDK
 `10.0.19041.0`, builds `Release|ARM64`, runs Inf2Cat when available, compiles
-the additive SSDT when `iasl.exe` is available, writes SHA-256 checksums, and
+both ACPI sources when `iasl.exe` is available, writes SHA-256 checksums, and
 creates a ZIP below `out/windows/Release`.
 
 Useful options:
@@ -102,9 +110,10 @@ export CLANG_ROOT=/path/to/llvm/bin
 
 Output is written to `out/ARM64/Release`.
 
-Compile the additive ACPI table with:
+Compile the ACPI tables with:
 
 ```sh
+iasl -ve slsiufsstor/acpi/DSDT-troika.asl
 iasl -ve slsiufsstor/acpi/UFS0-CLS.asl
 ```
 
@@ -131,6 +140,33 @@ diskpart
 rescan
 list disk
 ```
+
+### No-keyboard device test
+
+For a phone with no working USB input driver, install the unattended smoke test
+into an already mounted ARM64 WinPE image. It injects the driver and replaces
+WinPE's `startnet.cmd`, while retaining the previous file as
+`startnet.before-ufs-smoke-test.cmd`:
+
+```powershell
+dism /Mount-Image /ImageFile:C:\images\boot.wim /Index:1 /MountDir:C:\mount
+.\install-winpe-smoke-test.ps1 `
+    -MountDirectory C:\mount `
+    -DriverPackageDirectory .\out\windows\Release\package `
+    -ForceUnsigned
+dism /Unmount-Image /MountDir:C:\mount /Commit
+```
+
+At boot, the screen continuously shows the service state, matching Plug and
+Play devices, and `diskpart` disk/volume enumeration. It reports `CANDIDATE
+PASS` only when a UFS device and a physical disk both appear. The procedure is
+read-only: it rescans and enumerates storage but does not create, format, or
+write a partition. Photograph the screen to retain the result.
+
+No BSOD by itself proves only that Windows did not crash. It does not show that
+the platform filter loaded, link startup completed, or a disk enumerated. For
+deeper diagnosis, use a 1.8 V UART adapter and kernel debugging/serial capture;
+never connect a 3.3 V UART directly to the phone.
 
 ## First hardware validation
 

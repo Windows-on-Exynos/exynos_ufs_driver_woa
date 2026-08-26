@@ -31,5 +31,8 @@
     <None Include="acpi\UFS0-CLS.asl">
       <Filter>Driver Files</Filter>
     </None>
+    <None Include="acpi\DSDT-troika.asl">
+      <Filter>Driver Files</Filter>
+    </None>
   </ItemGroup>
 </Project>

@@ -13,6 +13,7 @@
 /* Exynos9610 resources, verified against the troika kernel and LK port. */
 #define UFS_HCI_PHYS            0x13520000ULL
 #define UFS_HCI_SIZE            0x00000200UL
+#define UFS_ACPI_HCI_WINDOW_SIZE 0x00005000UL
 #define UFS_VS_PHYS             0x13521100ULL
 #define UFS_VS_SIZE             0x00000200UL
 #define UFS_UNIPRO_PHYS         0x13510000ULL
@@ -114,6 +115,7 @@ typedef struct _SLSI_UFS_EXTENSION {
     NTSTATUS LastUicStatus;
     ULONG RawInterrupt;
     ULONG HciResourceLength;
+    ULONG UniproResourceLength;
     BOOLEAN Started;
 } SLSI_UFS_EXTENSION, *PSLSI_UFS_EXTENSION;
 
@@ -221,10 +223,12 @@ SlsiUfsValidateResources(PIO_STACK_LOCATION Stack,
     ULONG fullIndex;
     ULONG partialIndex;
     BOOLEAN foundHci = FALSE;
+    BOOLEAN foundUnipro = FALSE;
     BOOLEAN foundInterrupt = FALSE;
 
     Extension->RawInterrupt = 0;
     Extension->HciResourceLength = 0;
+    Extension->UniproResourceLength = 0;
 
     list = Stack->Parameters.StartDevice.AllocatedResources;
     if (list == NULL) {
@@ -245,6 +249,10 @@ SlsiUfsValidateResources(PIO_STACK_LOCATION Stack,
                 descriptor->u.Memory.Start.QuadPart == UFS_HCI_PHYS) {
                 Extension->HciResourceLength = descriptor->u.Memory.Length;
                 foundHci = TRUE;
+            } else if (descriptor->Type == CmResourceTypeMemory &&
+                       descriptor->u.Memory.Start.QuadPart == UFS_UNIPRO_PHYS) {
+                Extension->UniproResourceLength = descriptor->u.Memory.Length;
+                foundUnipro = TRUE;
             } else if (descriptor->Type == CmResourceTypeInterrupt) {
                 Extension->RawInterrupt = descriptor->u.Interrupt.Level;
                 foundInterrupt = TRUE;
@@ -252,10 +260,18 @@ SlsiUfsValidateResources(PIO_STACK_LOCATION Stack,
         }
     }
 
-    if (!foundHci || Extension->HciResourceLength < UFS_HCI_SIZE) {
+    if (!foundHci ||
+        Extension->HciResourceLength < UFS_ACPI_HCI_WINDOW_SIZE) {
         UFS_LOG(DPFLTR_ERROR_LEVEL,
                 "invalid HCI resource: found=%u length=0x%lx\n",
                 (ULONG)foundHci, Extension->HciResourceLength);
+        return STATUS_DEVICE_CONFIGURATION_ERROR;
+    }
+
+    if (!foundUnipro || Extension->UniproResourceLength < UFS_UNIPRO_SIZE) {
+        UFS_LOG(DPFLTR_ERROR_LEVEL,
+                "invalid UniPro resource: found=%u length=0x%lx\n",
+                (ULONG)foundUnipro, Extension->UniproResourceLength);
         return STATUS_DEVICE_CONFIGURATION_ERROR;
     }
 
@@ -268,8 +284,10 @@ SlsiUfsValidateResources(PIO_STACK_LOCATION Stack,
     }
 
     UFS_LOG(DPFLTR_INFO_LEVEL,
-            "resources verified: HCI length=0x%lx GSIV=%lu\n",
-            Extension->HciResourceLength, Extension->RawInterrupt);
+            "resources verified: HCI=0x%lx UniPro=0x%lx GSIV=%lu\n",
+            Extension->HciResourceLength,
+            Extension->UniproResourceLength,
+            Extension->RawInterrupt);
     return STATUS_SUCCESS;
 }
 

@@ -145,10 +145,14 @@ function Resolve-Iasl {
 $repoRoot = Split-Path -Parent $MyInvocation.MyCommand.Path
 $project = Join-Path $repoRoot "slsiufsstor\slsiufsstor.vcxproj"
 $inf = Join-Path $repoRoot "slsiufsstor\slsiufsstor.inf"
-$asl = Join-Path $repoRoot "slsiufsstor\acpi\UFS0-CLS.asl"
+$acpiSourceDir = Join-Path $repoRoot "slsiufsstor\acpi"
+$aslSources = @(
+    (Join-Path $acpiSourceDir "DSDT-troika.asl"),
+    (Join-Path $acpiSourceDir "UFS0-CLS.asl")
+)
 $readme = Join-Path $repoRoot "README.md"
 
-foreach ($requiredFile in @($project, $inf, $asl, $readme)) {
+foreach ($requiredFile in @($project, $inf, $readme) + $aslSources) {
     if (-not (Test-Path -LiteralPath $requiredFile -PathType Leaf)) {
         throw "Required source file was not found: $requiredFile"
     }
@@ -206,20 +210,22 @@ if (-not $driver -or -not (Test-Path -LiteralPath $driver -PathType Leaf)) {
 Write-Step "Staging the driver package"
 Copy-Item -LiteralPath $driver -Destination $packageDir -Force
 Copy-Item -LiteralPath $inf -Destination $packageDir -Force
-Copy-Item -LiteralPath $asl -Destination $packageDir -Force
+Copy-Item -LiteralPath $aslSources -Destination $packageDir -Force
 Copy-Item -LiteralPath $readme -Destination $packageDir -Force
 
 $iasl = Resolve-Iasl -RequestedPath $IaslPath -RepositoryRoot $repoRoot
 if ($iasl) {
-    Write-Step "Compiling the additive ACPI table"
-    $amlPrefix = Join-Path $packageDir "UFS0-CLS"
-    & $iasl -ve -p $amlPrefix $asl
-    if ($LASTEXITCODE -ne 0) {
-        throw "IASL failed with exit code $LASTEXITCODE"
+    Write-Step "Compiling the ACPI tables"
+    foreach ($asl in $aslSources) {
+        $amlPrefix = Join-Path $packageDir ([IO.Path]::GetFileNameWithoutExtension($asl))
+        & $iasl -ve -p $amlPrefix $asl
+        if ($LASTEXITCODE -ne 0) {
+            throw "IASL failed for $asl with exit code $LASTEXITCODE"
+        }
     }
 }
 else {
-    Write-Warning "iasl.exe was not found; UFS0-CLS.asl was staged without AML."
+    Write-Warning "iasl.exe was not found; ACPI sources were staged without AML."
 }
 
 if (-not $SkipCatalog) {
